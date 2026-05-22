@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goblin Horde — Class Wars</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="root">
+  <div class="hud">
+    <div class="bw"><div class="bl">HP</div><div class="bt"><div class="bf" id="hf" style="width:100%;background:#e24b4a;"></div></div></div>
+    <div class="bw"><div class="bl" id="res2lbl">Mana</div><div class="bt"><div class="bf" id="mf" style="width:100%;background:#6a60e8;"></div></div></div>
+    <div class="bw"><div class="bl">XP</div><div class="bt"><div class="bf" id="xf" style="width:0%;background:#97c459;"></div></div></div>
+    <div class="hr">Wave<span id="wv">1</span>&nbsp;Score<span id="sc">0</span>&nbsp;Lv<span id="lv">1</span></div>
+    <button class="hbtn" onclick="togglePerks()">[P]Perks</button>
+    <button class="hbtn" id="rb">[ Start ]</button>
+  </div>
+  <div class="cwrap">
+    <canvas id="gc" width="700" height="420" tabindex="0"></canvas>
+    <!-- Class select -->
+    <div class="csel" id="csel">
+      <div class="csel-title">⚔ CHOOSE YOUR CLASS ⚔</div>
+      <div class="csel-subtitle">Click a class to select · Scroll to see all 10</div>
+      <div class="csel-scroll">
+        <div class="csel-grid" id="cselGrid"></div>
+      </div>
+      <div class="csel-footer">
+        <div>
+          <div class="csel-selected-label">Selected:</div>
+          <div class="csel-selected-name" id="cselName">Wizard</div>
+        </div>
+        <button class="start-btn" onclick="confirmClass()">▶ ENTER THE ARENA</button>
+      </div>
+    </div>
+    <!-- Perk overlay -->
+    <div class="pov" id="pov">
+      <div class="pt" id="ptitle">✦ SKILL TREE ✦</div>
+      <div class="pcols" id="pcols"></div>
+      <div class="usec">
+        <div class="utitle">⚡ CLASS ULTIMATES — unlock for 2 perk pts each ⚡</div>
+        <div class="ugrid" id="ugrid"></div>
+      </div>
+      <div class="pfooter">
+        <span style="color:#f5c842">Points: <span id="ppel">0</span></span>
+        <button class="hbtn" onclick="togglePerks()">[Close]</button>
+      </div>
+    </div>
+    <div class="lvlb" id="lvlb"></div>
+  </div>
+  <div class="sb" id="sb"></div>
+  <div class="hint" id="hint">click canvas · WASD/arrows=move+jump · 1/2/3/4=abilities · 6/7=ultimates · P=perks</div>
+</div>
+
+<!-- Load order matters: constants → classes → engine → draw -->
+<script src="constants.js"></script>
+<script src="classes.js"></script>
+<script src="engine.js"></script>
+<script src="draw.js"></script>
+</body>
+</html>
