@@ -1545,11 +1545,11 @@ gorilla:{
     {name:'Banana',key:'3',cost:0,cd:38,desc:'Hurl a banana — enemies slip and fall. Rotten perk adds burn.',
      cast(p,G){
        const has=id=>G.owned.has(id);
-       const vx=p.facing*(has('gb1')?12:8);
+       const vx=p.facing*(has('gb1')?12:4);
        const dmg=has('gb2')?32:18;
        const count=has('gb3')?3:1;
        for(let i=0;i<count;i++){
-         const vy=-5.5-i*0.8;
+         const vy=-7-i*0.8;
          const spreadVx=vx+(i-Math.floor(count/2))*0.8;
          spawnProj(G,
            p.x+(p.facing===1?p.w+4:-4),p.y+12,

@@ -562,6 +562,7 @@ function update(){
       }
     }
     if(!pr.noGrav&&!pr.isMeteor&&pr.type!=='arrow'&&!pr.isSaber)pr.vy+=.07;
+    if(pr.isBanana) pr.vy += 0.52;
     if(pr.type==='arrow'&&!pr.rainArrow){/* arrows travel flat */}
     if(pr.rainArrow){pr.vy+=.18;} // rain arrows accelerate downward
     pr.life-=.013;
@@ -593,30 +594,10 @@ function update(){
       if(dist>(useRect?1:pr.radius+e.w/2))continue;
       let dmg=pr.dmg;
       if(pr.type==='arrow'&&e.marked)dmg=Math.round(dmg*(G.owned.has('rv2')?4:3));
-      if(pr.type==='ice'&&e.frozen>0&&G.owned.has('wi2'))dmg*=2;
-      if(pr.type==='ice'){
-        e.frozen=G.owned.has('wi1')?280:140;
-        emitP(G, e.x+e.w/2, e.y+e.h/2, {
-          col:  '#aaddff',
-      ramp: RAMPS.ice,
-    n:    20,
-    sp:   3,
-    sz:   5,
-    fade: 0.008,
-    vyBias: -1
-  });
-}
-      if(pr.type==='ice')e.frozen=G.owned.has('wi1')?280:140;
       if(pr.type==='ice'){
   e.frozen=G.owned.has('wi1')?280:140;
   emitP(G, e.x+e.w/2, e.y+e.h/2, {
-    col:  '#aaddff',
-    ramp: RAMPS.ice,
-    n:    20,
-    sp:   3,
-    sz:   5,
-    fade: 0.008,
-    vyBias: -1
+    col:'#aaddff', ramp:RAMPS.ice, n:20, sp:3, sz:5, fade:0.008, vyBias:-1
   });
 }
       if(pr.type==='plasma'&&G.owned.has('cy4'))e.burn=150;
@@ -753,7 +734,6 @@ function update(){
         const projCol=e.isDarkWiz?'#cc44ff':e.isOrcShaman?'#80ff40':e.isSkelArcher?'#d4cbb0':'#ff8800';
         const projType=e.isDarkWiz?'enemySpell':e.isOrcShaman?'enemySpell':'enemyArrow';
         const pSize=e.isDarkWiz?9:e.isOrcShaman?8:5;
-        pt.life -= pt.fade;
         spawnProj(G,e.x+e.w/2,e.y+e.h*.4,dx/len*spd,dy/len*spd,pSize,projCol,e.dmg,projType,{isEnemyProj:true,noGrav:e.isDarkWiz||e.isOrcShaman});
         emitP(G,e.x+e.w/2,e.y+e.h*.4,projCol,6,2);
       }

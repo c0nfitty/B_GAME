@@ -448,11 +448,34 @@ function drawGoblin(e){
 
 function drawProjs(){
   G.projs.forEach(pr=>{
+    if(pr.isBanana){
+  CX.save();
+  CX.translate(pr.x, pr.y);
+  CX.rotate(Math.atan2(pr.vy, pr.vx));
+  CX.globalAlpha=Math.min(pr.life,1);
+  // banana body — curved like a real banana
+  CX.strokeStyle='#f5c842';CX.lineWidth=6;CX.lineCap='round';
+  CX.beginPath();
+  CX.moveTo(-10, 4);
+  CX.quadraticCurveTo(0, -10, 10, 4);
+  CX.stroke();
+  // darker edge on inside of curve
+  CX.strokeStyle='#c8960a';CX.lineWidth=2;
+  CX.beginPath();
+  CX.moveTo(-8, 3);
+  CX.quadraticCurveTo(0, -5, 8, 3);
+  CX.stroke();
+  // brown tips
+  CX.fillStyle='#5a2a00';CX.lineWidth=1;
+  CX.beginPath();CX.arc(-10,4,2.5,0,Math.PI*2);CX.fill();
+  CX.beginPath();CX.arc(10,4,2.5,0,Math.PI*2);CX.fill();
+  CX.globalAlpha=1;CX.restore();
+  return;
+}
     pr.trail.forEach((t,i)=>{CX.globalAlpha=(i/pr.trail.length)*.38*Math.min(pr.life,1);CX.fillStyle=pr.color;CX.beginPath();CX.arc(t.x,t.y,pr.radius*(i/pr.trail.length)*.7,0,Math.PI*2);CX.fill();});
     CX.globalAlpha=Math.min(pr.life,1);CX.fillStyle=pr.color;CX.beginPath();CX.arc(pr.x,pr.y,pr.radius,0,Math.PI*2);CX.fill();
     if(pr.type==='arrow'||pr.isDynamite){CX.fillStyle='#fff';CX.globalAlpha=Math.min(pr.life*.35,1);CX.beginPath();CX.arc(pr.x-pr.radius*.3,pr.y-pr.radius*.3,pr.radius*.35,0,Math.PI*2);CX.fill();}
     if(pr.isSaber){
-      // Draw as lightsaber blade
       CX.save();
       const angle=Math.atan2(pr.vy,pr.vx);
       CX.translate(pr.x,pr.y);CX.rotate(angle);
@@ -463,7 +486,6 @@ function drawProjs(){
       CX.beginPath();CX.moveTo(-18,0);CX.lineTo(18,0);CX.stroke();
       CX.shadowBlur=0;CX.restore();
     }
-    // Enemy spell glow
     if((pr.type==='enemySpell')&&!pr.isEnemyProj===false){
       CX.globalAlpha=Math.min(pr.life,.7);
       CX.fillStyle=pr.color;CX.beginPath();CX.arc(pr.x,pr.y,pr.radius*1.5,0,Math.PI*2);CX.fill();
