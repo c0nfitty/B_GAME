@@ -6,7 +6,7 @@ A browser-based 2D wave survival game. Pick a class, survive escalating waves of
 
 ## How to Run
 
-copy project to <local directory>
+copy project to local directory
 ```bash
 cd <local directory>
 
