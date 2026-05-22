@@ -636,7 +636,7 @@ function draw(){
   if(!G.running&&!G.curClass)return;
   if(!G.running&&G.tick===0)return;
   drawProjs();drawTraps();drawEffects();
-  G.enemies.forEach(e=>{ if(!e.alive)return; if(e.etype==="undead")drawUndead(e); else if(e.etype==="orc")drawOrc(e); else drawGoblin(e); });
+  G.enemies.forEach(e=>{ if(!e.alive)return; drawEnemy(e); });
   if(G.running||G.tick>0){CLASSES[G.curClass]?.drawPlayer(G.player,CX,G.tick);}
 G.parts.forEach(pt=>{
   CX.globalAlpha=Math.min(1,pt.life);
@@ -646,7 +646,6 @@ G.parts.forEach(pt=>{
   CX.arc(pt.x, pt.y, s/2, 0, Math.PI*2);
   CX.fill();
 });CX.globalAlpha=1;
-CX.globalAlpha=1;
   CX.globalAlpha=1;
   G.floats.forEach(f=>{CX.globalAlpha=f.life;CX.font="bold 12px 'Courier New',monospace";CX.fillStyle=f.col;CX.textAlign='center';CX.fillText(f.txt,f.x,f.y);});CX.globalAlpha=1;CX.textAlign='left';
   if(G.stormTick>0){CX.fillStyle='#f5c842';CX.font="10px 'Courier New',monospace";CX.fillText('STORM: '+Math.ceil(G.stormTick/60)+'s',8,16);}

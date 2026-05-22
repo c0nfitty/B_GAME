@@ -151,15 +151,7 @@ function killE(g,e){
     emitP(g,e.x+e.w/2,e.y+e.h/2,'#97c459',24,6);
     addFloat(g,'DEATH MARK!',e.x+e.w/2,e.y-15,'#97c459');
   }
-  // REMOVE the emitP + tagging loop, replace with:
-  emitP(g, e.x+e.w/2, e.y+e.h/2, { col:e.col, n:28, sp:4, ramp:RAMPS.fire, sz:10 });
-  
-  // then grab the last particle batch and tag them:
-const start = Math.max(0, g.parts.length - 28);
-for(let i = start; i < g.parts.length; i++){
-  g.parts[i].ramp = RAMPS.fire;
-  g.parts[i].sz   = 5 + Math.random() * 7;
-}
+  emitP(g, e.x+e.w/2, e.y+e.h/2, { col:e.col, n:28, sp:4, ramp:RAMPS.fire, sz:10, fade:0.025 });
   addFloat(g,'+'+e.score,e.x+e.w/2,e.y-12,'#f5c842');
   // Cowboy Grit passive: +1 ammo per kill
   if(g.curClass==='cowboy')g.player.res=Math.min(g.player.maxRes,g.player.res+1);
@@ -793,9 +785,10 @@ emitP(G, p.x+p.w/2, p.y+p.h/2, {
   });
 
   if(p.hp<=0)G.running=false;
-G.parts=G.parts.filter(pt=>pt.life>0);G.parts.forEach(pt=>{pt.x+=pt.vx;pt.y+=pt.vy;pt.vy+=0.18;pt.vx*=0.91;pt.vy*=0.93;pt.life-=pt.fade;});
+  G.parts=G.parts.filter(pt=>pt.life>0);G.parts.forEach(pt=>{pt.x+=pt.vx;pt.y+=pt.vy;pt.vy+=0.18;pt.vx*=0.91;pt.vy*=0.93;pt.life-=pt.fade;});
   G.floats=G.floats.filter(f=>f.life>0);G.floats.forEach(f=>{f.y+=f.vy;f.life-=.022;});
   if(G.swingAnim){G.swingAnim.t--;if(G.swingAnim.t<=0)G.swingAnim=null;}
+  if(G.lassoAnim){G.lassoAnim.t--;if(G.lassoAnim.t<=0)G.lassoAnim=null;}
   // Dogmeat update
   G.dogmeats=G.dogmeats.filter(dm=>{
     dm.t++;
@@ -822,191 +815,6 @@ G.parts=G.parts.filter(pt=>pt.life>0);G.parts.forEach(pt=>{pt.x+=pt.vx;pt.y+=pt.
     }
     return true;
   });
-  // Pip-Boy scan visual
-  if(G.pipScan){G.pipScan.t--;G.pipScan.r=G.pipScan.r+(280-G.pipScan.r)*.2;if(G.pipScan.t<=0)G.pipScan=null;}
-  // Smoke cloud
-  if(G.smokeCloud){
-    const sc=G.smokeCloud;
-    const fade=Math.min(1,sc.timer/40)*Math.min(1,(sc.maxTimer-sc.timer)/20+.3);
-    CX.save();
-    CX.globalAlpha=fade*.35;
-    CX.fillStyle='#888888';
-    CX.beginPath();CX.arc(sc.x,sc.y,sc.radius,0,Math.PI*2);CX.fill();
-    CX.globalAlpha=fade*.15;
-    CX.fillStyle='#aaaaaa';
-    CX.beginPath();CX.arc(sc.x,sc.y,sc.radius*.65,0,Math.PI*2);CX.fill();
-    CX.globalAlpha=1;CX.restore();
-  }
-  // Dogmeat draw
-  G.dogmeats.forEach(dm=>{
-    CX.save();CX.translate(dm.x,dm.y);
-    const leanAng=dm.biting?0:Math.atan2(dm.ty-dm.y,dm.tx-dm.x)*.3;
-    CX.rotate(leanAng);
-    // Dog body
-    CX.fillStyle='#8b6030';CX.fillRect(-10,-8,20,12);
-    CX.fillStyle='#7a5020';
-    // Head
-    CX.beginPath();CX.ellipse(10,-4,7,6,0,0,Math.PI*2);CX.fill();
-    // Snout
-    CX.fillStyle='#5a3010';CX.beginPath();CX.ellipse(16,-3,4,3,0,0,Math.PI*2);CX.fill();
-    // Nose
-    CX.fillStyle='#222';CX.beginPath();CX.arc(19,-3,1.5,0,Math.PI*2);CX.fill();
-    // Eye
-    CX.fillStyle='#1a0a00';CX.beginPath();CX.arc(9,-6,1.5,0,Math.PI*2);CX.fill();
-    CX.fillStyle='#ff8800';CX.beginPath();CX.arc(9,-6,.8,0,Math.PI*2);CX.fill();
-    // Ear
-    CX.fillStyle='#5a3010';CX.beginPath();CX.moveTo(6,-8);CX.lineTo(2,-14);CX.lineTo(10,-10);CX.closePath();CX.fill();
-    // Tail
-    CX.strokeStyle='#8b6030';CX.lineWidth=3;
-    CX.beginPath();CX.moveTo(-10,-2);CX.quadraticCurveTo(-16,-12,-12,-16);CX.stroke();
-    // Legs (animated)
-    const legAnim=dm.biting?0:Math.sin(dm.t*.4)*5;
-    CX.fillStyle='#7a5020';
-    CX.fillRect(-8,4,4,6+legAnim);CX.fillRect(-2,4,4,6-legAnim);
-    CX.fillRect(4,4,4,6+legAnim);CX.fillRect(10,4,4,6-legAnim);
-    // Bandana (red, Fallout style)
-    CX.fillStyle='#cc2200';CX.beginPath();CX.moveTo(5,-9);CX.lineTo(14,-6);CX.lineTo(14,-4);CX.lineTo(5,-7);CX.closePath();CX.fill();
-    if(dm.biting){CX.fillStyle='#ff4400';CX.globalAlpha=.5;CX.beginPath();CX.arc(16,-3,8,0,Math.PI*2);CX.fill();CX.globalAlpha=1;}
-    CX.restore();
-  });
-  // Pip-Boy scan ring
-  if(G.pipScan){
-    CX.save();CX.globalAlpha=G.pipScan.t/40*.4;CX.strokeStyle='#00ffcc';CX.lineWidth=2;
-    CX.beginPath();CX.arc(G.pipScan.x,G.pipScan.y,G.pipScan.r,0,Math.PI*2);CX.stroke();
-    CX.globalAlpha=1;CX.restore();
-  }
-  // VATS overlay
-  if(G.vatsSlow>0){
-    CX.fillStyle=`rgba(0,255,200,${.03+Math.sin(G.tick*.1)*.01})`;CX.fillRect(0,0,W,H);
-    CX.fillStyle='#00ffcc';CX.font="10px 'Courier New',monospace";CX.fillText('V.A.T.S: '+Math.ceil(G.vatsSlow/60)+'s',8,28);
-  }
-  // Slam ripple
-  if(G.slamRipple){
-    const sr=G.slamRipple;sr.t--;
-    sr.r+=(sr.maxR-sr.r)*.25;
-    CX.save();CX.globalAlpha=sr.t/(sr.t<10?sr.t:20)*.5;
-    CX.strokeStyle=sr.col||'#8b5e3c';CX.lineWidth=3;
-    CX.beginPath();CX.arc(sr.x,sr.y,sr.r,0,Math.PI*2);CX.stroke();
-    CX.globalAlpha=1;CX.restore();
-    if(sr.t<=0)G.slamRipple=null;
-  }
-  // Cracked ground slow zone
-  if(G.crackedGround){
-    const cg=G.crackedGround;cg.t--;
-    CX.save();CX.globalAlpha=Math.min(cg.t/60,.4);
-    CX.fillStyle='#5a3a1a';CX.fillRect(cg.x-cg.w/2,H-T-6,cg.w,6);
-    CX.globalAlpha=1;CX.restore();
-    if(cg.t<=0)G.crackedGround=null;
-    // Slow enemies in cracked ground
-    G.enemies.forEach(e=>{if(e.alive&&Math.abs(e.x+e.w/2-cg.x)<cg.w/2&&e.y+e.h>=H-T-8)e.vx*=0.5;});
-  }
-  // Holy aura pulse
-  if(G.player&&G.player.holyAura){
-    const ha=G.player.holyAura;ha.t--;ha.r=ha.maxR*(1-ha.t/30);
-    CX.save();CX.globalAlpha=ha.t/30*.4;CX.strokeStyle='#f5c842';CX.lineWidth=3;
-    CX.beginPath();CX.arc(ha.x,ha.y,ha.r,0,Math.PI*2);CX.stroke();
-    CX.globalAlpha=1;CX.restore();
-    if(ha.t<=0)G.player.holyAura=null;
-  }
-  // Smite bolt
-  if(G.player&&G.player.smiteBolt){
-    const sb=G.player.smiteBolt;sb.t--;
-    CX.save();CX.globalAlpha=sb.t/20;CX.strokeStyle='#f5c842';CX.lineWidth=4;
-    CX.beginPath();CX.moveTo(sb.x,0);CX.lineTo(sb.x,sb.y);CX.stroke();
-    CX.strokeStyle='#fff';CX.lineWidth=1.5;CX.beginPath();CX.moveTo(sb.x,0);CX.lineTo(sb.x,sb.y);CX.stroke();
-    CX.globalAlpha=1;CX.restore();
-    if(sb.t<=0)G.player.smiteBolt=null;
-  }
-  // Shadow clones
-  G.shadowClones.forEach(cl=>{
-    CX.save();CX.globalAlpha=.55;
-    CX.fillStyle='#444466';
-    CX.fillRect(cl.x-8,cl.y-16,16,28);
-    CX.fillStyle='#cc2222';CX.fillRect(cl.x-8,cl.y-6,16,3);
-    CX.fillStyle='#ff4444';CX.beginPath();CX.arc(cl.x-3,cl.y-12,1.5,0,Math.PI*2);CX.fill();CX.beginPath();CX.arc(cl.x+3,cl.y-12,1.5,0,Math.PI*2);CX.fill();
-    CX.globalAlpha=1;CX.restore();
-  });
-  if(G.lassoAnim){G.lassoAnim.t--;if(G.lassoAnim.t<=0)G.lassoAnim=null;}
-  // Dogmeat draw
-  G.dogmeats.forEach(dm=>{
-    CX.save();CX.translate(dm.x,dm.y);
-    const leanAng=dm.biting?0:Math.atan2(dm.ty-dm.y,dm.tx-dm.x)*.3;
-    CX.rotate(leanAng);
-    // Dog body
-    CX.fillStyle='#8b6030';CX.fillRect(-10,-8,20,12);
-    CX.fillStyle='#7a5020';
-    // Head
-    CX.beginPath();CX.ellipse(10,-4,7,6,0,0,Math.PI*2);CX.fill();
-    // Snout
-    CX.fillStyle='#5a3010';CX.beginPath();CX.ellipse(16,-3,4,3,0,0,Math.PI*2);CX.fill();
-    // Nose
-    CX.fillStyle='#222';CX.beginPath();CX.arc(19,-3,1.5,0,Math.PI*2);CX.fill();
-    // Eye
-    CX.fillStyle='#1a0a00';CX.beginPath();CX.arc(9,-6,1.5,0,Math.PI*2);CX.fill();
-    CX.fillStyle='#ff8800';CX.beginPath();CX.arc(9,-6,.8,0,Math.PI*2);CX.fill();
-    // Ear
-    CX.fillStyle='#5a3010';CX.beginPath();CX.moveTo(6,-8);CX.lineTo(2,-14);CX.lineTo(10,-10);CX.closePath();CX.fill();
-    // Tail
-    CX.strokeStyle='#8b6030';CX.lineWidth=3;
-    CX.beginPath();CX.moveTo(-10,-2);CX.quadraticCurveTo(-16,-12,-12,-16);CX.stroke();
-    // Legs (animated)
-    const legAnim=dm.biting?0:Math.sin(dm.t*.4)*5;
-    CX.fillStyle='#7a5020';
-    CX.fillRect(-8,4,4,6+legAnim);CX.fillRect(-2,4,4,6-legAnim);
-    CX.fillRect(4,4,4,6+legAnim);CX.fillRect(10,4,4,6-legAnim);
-    // Bandana (red, Fallout style)
-    CX.fillStyle='#cc2200';CX.beginPath();CX.moveTo(5,-9);CX.lineTo(14,-6);CX.lineTo(14,-4);CX.lineTo(5,-7);CX.closePath();CX.fill();
-    if(dm.biting){CX.fillStyle='#ff4400';CX.globalAlpha=.5;CX.beginPath();CX.arc(16,-3,8,0,Math.PI*2);CX.fill();CX.globalAlpha=1;}
-    CX.restore();
-  });
-  // Pip-Boy scan ring
-  if(G.pipScan){
-    CX.save();CX.globalAlpha=G.pipScan.t/40*.4;CX.strokeStyle='#00ffcc';CX.lineWidth=2;
-    CX.beginPath();CX.arc(G.pipScan.x,G.pipScan.y,G.pipScan.r,0,Math.PI*2);CX.stroke();
-    CX.globalAlpha=1;CX.restore();
-  }
-  // VATS overlay
-  if(G.vatsSlow>0){
-    CX.fillStyle=`rgba(0,255,200,${.03+Math.sin(G.tick*.1)*.01})`;CX.fillRect(0,0,W,H);
-    CX.fillStyle='#00ffcc';CX.font="10px 'Courier New',monospace";CX.fillText('V.A.T.S: '+Math.ceil(G.vatsSlow/60)+'s',8,28);
-  }
-  // Slam ripple
-  if(G.slamRipple){
-    const sr=G.slamRipple;sr.t--;
-    sr.r+=(sr.maxR-sr.r)*.25;
-    CX.save();CX.globalAlpha=sr.t/(sr.t<10?sr.t:20)*.5;
-    CX.strokeStyle=sr.col||'#8b5e3c';CX.lineWidth=3;
-    CX.beginPath();CX.arc(sr.x,sr.y,sr.r,0,Math.PI*2);CX.stroke();
-    CX.globalAlpha=1;CX.restore();
-    if(sr.t<=0)G.slamRipple=null;
-  }
-  // Cracked ground slow zone
-  if(G.crackedGround){
-    const cg=G.crackedGround;cg.t--;
-    CX.save();CX.globalAlpha=Math.min(cg.t/60,.4);
-    CX.fillStyle='#5a3a1a';CX.fillRect(cg.x-cg.w/2,H-T-6,cg.w,6);
-    CX.globalAlpha=1;CX.restore();
-    if(cg.t<=0)G.crackedGround=null;
-    // Slow enemies in cracked ground
-    G.enemies.forEach(e=>{if(e.alive&&Math.abs(e.x+e.w/2-cg.x)<cg.w/2&&e.y+e.h>=H-T-8)e.vx*=0.5;});
-  }
-  // Holy aura pulse
-  if(G.player&&G.player.holyAura){
-    const ha=G.player.holyAura;ha.t--;ha.r=ha.maxR*(1-ha.t/30);
-    CX.save();CX.globalAlpha=ha.t/30*.4;CX.strokeStyle='#f5c842';CX.lineWidth=3;
-    CX.beginPath();CX.arc(ha.x,ha.y,ha.r,0,Math.PI*2);CX.stroke();
-    CX.globalAlpha=1;CX.restore();
-    if(ha.t<=0)G.player.holyAura=null;
-  }
-  // Smite bolt
-  if(G.player&&G.player.smiteBolt){
-    const sb=G.player.smiteBolt;sb.t--;
-    CX.save();CX.globalAlpha=sb.t/20;CX.strokeStyle='#f5c842';CX.lineWidth=4;
-    CX.beginPath();CX.moveTo(sb.x,0);CX.lineTo(sb.x,sb.y);CX.stroke();
-    CX.strokeStyle='#fff';CX.lineWidth=1.5;CX.beginPath();CX.moveTo(sb.x,0);CX.lineTo(sb.x,sb.y);CX.stroke();
-    CX.globalAlpha=1;CX.restore();
-    if(sb.t<=0)G.player.smiteBolt=null;
-  }
   // Shadow clones
   G.shadowClones=G.shadowClones.filter(cl=>{
     cl.t++;
